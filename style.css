@@ -840,3 +840,35 @@ body.dark-theme .toast {
     background: #351d21 !important;
   }
 }
+
+/* V8.3.16 — mobile date-field alignment only. Keep existing labels/names unchanged. */
+@media (max-width: 700px){
+  #modal input[type="date"]{
+    width:100% !important;
+    max-width:100% !important;
+    min-width:0 !important;
+    box-sizing:border-box !important;
+    display:block !important;
+    text-align:left !important;
+    text-align-last:left !important;
+    padding-left:16px !important;
+    padding-right:42px !important;
+    font-size:16px !important;
+    line-height:1.2 !important;
+    overflow:hidden !important;
+  }
+
+  /* iOS Safari uses an internal date-value element that can otherwise center
+     the date and make the control appear to run beyond its field. */
+  #modal input[type="date"]::-webkit-date-and-time-value{
+    text-align:left !important;
+    width:100% !important;
+    margin:0 !important;
+  }
+
+  #modal input[type="date"]::-webkit-calendar-picker-indicator{
+    margin-left:auto !important;
+    margin-right:0 !important;
+    padding:0 !important;
+  }
+}
