@@ -186,6 +186,7 @@
     document.getElementById('exportBtn').addEventListener('click', exportBackup);
     document.getElementById('exportCsvBtn').addEventListener('click', exportExcelReport);
     document.getElementById('importInput').addEventListener('change', importBackup);
+    document.getElementById('clearDataBtn').addEventListener('click', clearAllData);
     document.getElementById('modalCloseBtn').addEventListener('click', closeModal);
     document.getElementById('modalCancelBtn').addEventListener('click', closeModal);
     document.getElementById('modalForm').addEventListener('submit', e => { e.preventDefault(); const result = editor?.(); if (result !== false) closeModal(); });
@@ -928,7 +929,103 @@ ${sheets.map((s,i)=>`  <Override PartName="/xl/worksheets/sheet${i+1}.xml" Conte
     }
   }
 
-  function importBackup(e){ const file=e.target.files?.[0]; if(!file)return; const reader=new FileReader(); reader.onload=()=>{try{const incoming=normalize(JSON.parse(reader.result)); if(!confirm('Import this backup and replace the current data?'))return; state=incoming; state.settings.defaultMonth=state.settings.defaultMonth||monthKey(localToday()); document.getElementById('dashboardMonth').value=state.settings.defaultMonth; document.getElementById('reportMonth').value=state.settings.defaultMonth; save(); toast('Backup imported.');}catch{alert('That backup file is invalid.');}}; reader.readAsText(file); e.target.value=''; }
+  function importBackup(e){
+    const input = e.target;
+    const file = input.files?.[0];
+    if(!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const parsed = JSON.parse(String(reader.result || ''));
+        // Support both the current backup format and a backup wrapped in
+        // { state: ... } or { data: ... } for forward compatibility.
+        const source = parsed && typeof parsed === 'object'
+          ? (parsed.state && typeof parsed.state === 'object' ? parsed.state :
+             (parsed.data && typeof parsed.data === 'object' ? parsed.data : parsed))
+          : null;
+
+        if(!source || typeof source !== 'object') {
+          throw new Error('Invalid backup structure.');
+        }
+
+        const incoming = normalize(source);
+        const hasKnownData = ['bills','banks','bankTransactions','withdrawals'].some(
+          key => Array.isArray(incoming[key])
+        );
+
+        if(!hasKnownData) {
+          throw new Error('This file does not appear to be a Bill Tracker backup.');
+        }
+
+        const billCount = incoming.bills.length;
+        const bankCount = incoming.banks.length;
+        const txCount = incoming.bankTransactions.length;
+        const wdCount = incoming.withdrawals.length;
+
+        const confirmed = confirm(
+          `Import this backup and replace the current data?\n\n` +
+          `Bills / expenses: ${billCount}\n` +
+          `Bank accounts: ${bankCount}\n` +
+          `Bank transactions: ${txCount}\n` +
+          `Cash withdrawals: ${wdCount}`
+        );
+
+        if(!confirmed) {
+          toast('Import cancelled. Your current data was not changed.');
+          return;
+        }
+
+        state = incoming;
+        state.settings.defaultMonth = state.settings.defaultMonth || monthKey(localToday());
+
+        const dashboardMonth = document.getElementById('dashboardMonth');
+        const reportMonth = document.getElementById('reportMonth');
+        if(dashboardMonth) dashboardMonth.value = state.settings.defaultMonth;
+        if(reportMonth) reportMonth.value = state.settings.defaultMonth;
+
+        // Persist without triggering nested UI work, then render once.
+        persistOnly();
+        renderAll();
+
+        toast(`Backup imported successfully — ${billCount} bills/expenses restored.`);
+      } catch(error) {
+        console.error('Import failed:', error);
+        alert('Import failed: ' + (error?.message || 'The backup file is invalid.'));
+      } finally {
+        // Reset the file input so the same backup can be selected again.
+        input.value = '';
+      }
+    };
+
+    reader.onerror = () => {
+      input.value = '';
+      alert('Import failed: the backup file could not be read.');
+    };
+
+    reader.readAsText(file);
+  }
+
+  function clearAllData(){
+    const first = confirm(
+      'Clear ALL Bill Tracker data from this browser?\n\n' +
+      'This will remove bills, bank accounts, transactions, transfers, cash withdrawals, and cash adjustments.\n\n' +
+      'Your exported backup files will not be deleted.'
+    );
+
+    if(!first) return;
+
+    const second = confirm(
+      'Are you sure? This cannot be undone unless you have a backup file.'
+    );
+
+    if(!second) return;
+
+    state = defaultState();
+    persistOnly();
+    renderAll();
+    toast('All local data has been cleared.');
+  }
   function toast(msg){ const el=document.getElementById('toast'); el.textContent=msg; el.classList.add('show'); clearTimeout(toast.t); toast.t=setTimeout(()=>el.classList.remove('show'),2800); }
 
   init();

@@ -333,3 +333,44 @@ dialog{max-width:calc(100vw - 16px);margin:auto;overflow:hidden}
   .custom-select-menu{max-height:210px;border-radius:9px}
   .custom-select-option{min-height:42px;font-size:16px;padding:9px 10px}
 }
+
+/* =========================================================
+   V8.3.6 MOBILE ACTION ALIGNMENT
+   ========================================================= */
+.btn.danger{
+  background:#fff1f2;
+  border-color:#f3b7be;
+  color:#b42332;
+  box-shadow:0 4px 12px rgba(180,35,50,.08);
+}
+.btn.danger:hover{
+  background:#ffe4e7;
+  border-color:#e89aa4;
+}
+
+@media(max-width:700px){
+  /* Center the main Bills action on small screens. */
+  #addBillBtn{
+    align-self:center;
+    width:min(260px,100%);
+    text-align:center;
+  }
+}
+
+@media(max-width:430px){
+  /* Top utility buttons: two small buttons on row one,
+     centered Excel and Clear buttons below. */
+  .top-actions{
+    grid-template-columns:1fr 1fr;
+  }
+  .top-actions #exportCsvBtn{
+    grid-column:1 / -1;
+    width:min(220px,100%);
+    justify-self:center;
+  }
+  .top-actions #clearDataBtn{
+    grid-column:1 / -1;
+    width:min(220px,100%);
+    justify-self:center;
+  }
+}
