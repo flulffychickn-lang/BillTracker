@@ -45,3 +45,6 @@ The app includes a web app manifest and service worker so it can be installed on
 - JSON backup/import
 - Multi-sheet Excel report
 - PWA installation foundation
+
+
+V8.3.14: fixed dark-mode mobile table rows and custom dropdown menus so they no longer render white.

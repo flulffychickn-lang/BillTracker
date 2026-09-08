@@ -411,6 +411,18 @@ body.dark-theme .custom-select-trigger,
 body.dark-theme .custom-select-menu{background:#1a2824;color:var(--text);border-color:#334740}
 body.dark-theme .custom-option:hover,
 body.dark-theme .custom-option.active{background:#203a32}
+body.dark-theme .custom-select-option{background:#1a2824;color:var(--text);}
+body.dark-theme .custom-select-option:hover,
+body.dark-theme .custom-select-option:focus-visible,
+body.dark-theme .custom-select-option.selected{background:#203a32;color:var(--text);}
+body.dark-theme .table-wrap tr{background:#17221f;border-color:#334740;box-shadow:0 5px 14px rgba(0,0,0,.20);}
+body.dark-theme .table-wrap td{color:var(--text);}
+body.dark-theme .table-wrap td::before{color:var(--muted);}
+body.dark-theme .table-wrap th{color:var(--muted);}
+body.dark-theme .table-wrap table{background:transparent;}
+body.dark-theme .table-wrap .empty-state{background:transparent;color:var(--muted);}
+body.dark-theme .table-wrap .mini-btn{background:#1a2824;color:var(--text);border-color:#334740;}
+body.dark-theme .table-wrap .mini-btn:hover{background:#22332e;border-color:#486057;}
 .theme-toggle{background:#f3f7f5;border-color:#cbded6}
 body.dark-theme .theme-toggle{background:#25332f;border-color:#41544d;color:#f3fbf8}
 @media(max-width:700px){
@@ -557,4 +569,274 @@ body.dark-theme .month-picker-menu .month-picker-today{background:#15382f;color:
   .month-picker-inline .month-picker-menu{left:0;transform:none;width:100%;max-width:100%;top:calc(100% + 8px);padding:12px}
   .month-picker-inline.open .month-picker-menu::before{left:50%;}
   .month-picker-menu .month-picker-option{min-height:44px;font-size:15px}
+}
+
+/* V8.3.13 DARK MODE TABLE/CUSTOM DROPDOWN FIX */
+body.dark-theme .table-card .table-wrap tbody tr {
+  background:var(--panel) !important;
+  color:var(--text) !important;
+  border-color:var(--border) !important;
+  box-shadow:0 5px 14px rgba(0,0,0,.20) !important;
+}
+body.dark-theme .custom-select .custom-select-menu,
+body.dark-theme .custom-select .custom-select-option {
+  background:#1a2824 !important;
+  color:var(--text) !important;
+  border-color:#334740 !important;
+}
+body.dark-theme .custom-select .custom-select-option:hover,
+body.dark-theme .custom-select .custom-select-option:focus-visible,
+body.dark-theme .custom-select .custom-select-option.selected {
+  background:#203a32 !important;
+  color:var(--text) !important;
+}
+body.dark-theme .table-wrap td { color:var(--text) !important; }
+
+/* =========================================================
+   V8.3.14 — CORPORATE GREEN VISUAL THEME
+   Inspired by the approved dark-green dashboard mockup.
+   Keeps all existing functionality while giving the app a
+   cleaner corporate finance appearance.
+   ========================================================= */
+body.dark-theme{
+  --bg:#061c15;
+  --panel:#0b241c;
+  --text:#f3fbf7;
+  --muted:#a7bbb4;
+  --border:#1c5141;
+  --accent:#18c79a;
+  --accent-strong:#0fa87f;
+  --accent-soft:#123d30;
+  --success:#21c58b;
+  --success-soft:#103b2d;
+  --danger:#ef5350;
+  --danger-soft:#4a2025;
+  --warning:#f1c75b;
+  --warning-soft:#463b18;
+  --info:#67b8a1;
+  --info-soft:#153c31;
+  --shadow:0 14px 34px rgba(0,0,0,.24);
+}
+body.dark-theme{
+  background:
+    radial-gradient(circle at 12% 0%,rgba(24,199,154,.16),transparent 28%),
+    radial-gradient(circle at 92% 5%,rgba(16,116,83,.13),transparent 26%),
+    linear-gradient(145deg,#061b14 0%,#071d17 48%,#04130f 100%);
+  color:var(--text);
+}
+body.dark-theme:before{
+  background:
+    radial-gradient(circle at 15% 15%,rgba(24,199,154,.10),transparent 25%),
+    radial-gradient(circle at 85% 30%,rgba(61,180,127,.06),transparent 24%),
+    radial-gradient(circle at 50% 100%,rgba(24,199,154,.05),transparent 30%);
+}
+body.dark-theme .tabs{
+  background:rgba(7,29,23,.86);
+  border-color:#1b4b3c;
+  box-shadow:0 8px 22px rgba(0,0,0,.18);
+}
+body.dark-theme .tab{color:#d9ebe4}
+body.dark-theme .tab:hover{background:#10352a}
+body.dark-theme .tab.active{
+  background:linear-gradient(135deg,#0e9f78,#19c99b);
+  border-color:#18c79a;
+  box-shadow:0 9px 22px rgba(24,199,154,.22);
+}
+body.dark-theme .card,
+body.dark-theme .stat-card,
+body.dark-theme .bank-card{
+  background:linear-gradient(145deg,#0b241c,#0a211a);
+  border-color:#1b4b3c;
+  box-shadow:0 14px 30px rgba(0,0,0,.20);
+}
+body.dark-theme .stat-card.accent{
+  background:linear-gradient(135deg,#087458 0%,#11a77f 58%,#18c79a 100%);
+  border-color:#18c79a;
+}
+body.dark-theme .stat-card.accent span,
+body.dark-theme .stat-card.accent small{color:#e5fff7}
+body.dark-theme .btn,
+body.dark-theme .icon-btn,
+body.dark-theme .mini-btn,
+body.dark-theme input,
+body.dark-theme select,
+body.dark-theme textarea,
+body.dark-theme .month-display{
+  background:#0d2a21;
+  color:var(--text);
+  border-color:#285746;
+}
+body.dark-theme .btn:hover,
+body.dark-theme .icon-btn:hover,
+body.dark-theme .mini-btn:hover,
+body.dark-theme .month-display:hover{
+  background:#12382c;
+  border-color:#2b8064;
+}
+body.dark-theme .btn.primary{
+  background:#12b889;
+  border-color:#12b889;
+}
+body.dark-theme .btn.primary:hover{background:#0fa67b;border-color:#0fa67b}
+body.dark-theme .btn.secondary{background:#0d2a21;border-color:#285746}
+body.dark-theme .btn.info{background:#217f6b;border-color:#217f6b}
+body.dark-theme .btn.transfer{background:#236b59;border-color:#236b59}
+body.dark-theme .btn.transfer:hover{background:#1b594a;border-color:#1b594a}
+body.dark-theme .tip-banner{
+  background:linear-gradient(90deg,#0d3026,#0b2720);
+  border-color:#1d5040;
+  color:#bdd1ca;
+}
+body.dark-theme .tip-banner strong{color:#eefaf6}
+body.dark-theme .table-wrap th{background:#0a1f18;color:#a9c0b8}
+body.dark-theme .table-wrap td{border-color:#183f33;color:#e7f3ef!important}
+body.dark-theme .table-wrap tbody tr{background:#0b241c!important}
+body.dark-theme .bank-card{background:linear-gradient(180deg,#0e2b22,#0a211a)}
+body.dark-theme .category-bar{background:#15382e}
+body.dark-theme .category-fill{background:linear-gradient(90deg,#0fa77d,#35d4a7)}
+body.dark-theme .history-row.current{background:#103a2d}
+body.dark-theme .badge.paid{background:#104531;color:#63e2b5}
+body.dark-theme .badge.unpaid{background:#482126;color:#ff8582}
+body.dark-theme .field label{color:#abc0b9}
+body.dark-theme .field-help,.dark-theme .sub,.dark-theme .table-sub{color:#91aaa1}
+body.dark-theme dialog{background:#0a211a;color:var(--text)}
+body.dark-theme dialog::backdrop{background:rgba(1,10,7,.72)}
+body.dark-theme .modal-head{color:var(--text)}
+body.dark-theme .theme-icon{background:#0d2a21;border-color:#2b5f4e;color:#f4fffb}
+body.dark-theme .theme-icon:hover{background:#12382c;border-color:#3a8f71}
+body.dark-theme .footer{color:#78938a}
+
+/* Corporate-green light mode: lighter, clean, still recognizably the same brand. */
+body:not(.dark-theme){
+  background:
+    radial-gradient(circle at 10% 0%,rgba(24,199,154,.13),transparent 26%),
+    radial-gradient(circle at 92% 10%,rgba(64,145,112,.08),transparent 25%),
+    linear-gradient(145deg,#effaf5 0%,#f8fcfa 52%,#edf7f2 100%);
+}
+body:not(.dark-theme) .tabs{background:rgba(250,255,252,.90);border-color:#cde4da}
+body:not(.dark-theme) .tab.active{background:linear-gradient(135deg,#0b956f,#18b98e)}
+body:not(.dark-theme) .stat-card.accent{background:linear-gradient(135deg,#176751,#0aa37e)}
+body:not(.dark-theme) .bank-card{background:linear-gradient(180deg,#fbfffd,#eef8f3)}
+
+/* Header branding closer to the corporate mockup. */
+.brand-block h1{
+  background:linear-gradient(100deg,#08765c 0%,#10b98b 48%,#7be2be 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  text-shadow:0 8px 24px rgba(16,185,139,.12);
+}
+body.dark-theme .brand-block h1{
+  background:linear-gradient(100deg,#f5fffb 0%,#8ee9c8 55%,#18c79a 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+
+/* Give the utility controls a more consistent corporate hierarchy. */
+body.dark-theme .top-actions .btn{border-color:#285746}
+body.dark-theme #exportCsvBtn{background:#176f5a;border-color:#1c9f7c}
+body.dark-theme #clearDataBtn{background:#351d21;border-color:#754047;color:#ffb1ae}
+body.dark-theme #clearDataBtn:hover{background:#482329}
+
+@media(max-width:700px){
+  body.dark-theme .card,body.dark-theme .stat-card{border-radius:16px}
+  body.dark-theme .tabs{background:rgba(7,29,23,.94)}
+}
+
+/* V8.3.15 — Restore corporate-green button and message styling */
+body.dark-theme .btn,
+body.dark-theme .icon-btn,
+body.dark-theme .mini-btn,
+body.dark-theme .icon-mini,
+body.dark-theme .month-display,
+body.dark-theme .custom-select-trigger,
+body.dark-theme .custom-select-option,
+body.dark-theme .month-picker-nav,
+body.dark-theme .month-picker-option,
+body.dark-theme .month-picker-close,
+body.dark-theme .month-picker-today {
+  color: var(--text) !important;
+  background-color: #0d2a21 !important;
+  border-color: #285746 !important;
+  opacity: 1 !important;
+}
+
+body.dark-theme .btn.primary,
+body.dark-theme .btn.primary.prominent,
+body.dark-theme .btn.success,
+body.dark-theme .mini-btn.success-action,
+body.dark-theme .month-picker-option.selected {
+  color: #fff !important;
+  background: linear-gradient(135deg,#0e9f78,#18c79a) !important;
+  border-color: #18c79a !important;
+}
+
+body.dark-theme .btn.info {
+  color: #fff !important;
+  background: #176f5a !important;
+  border-color: #1c9f7c !important;
+}
+
+body.dark-theme .btn.transfer {
+  color: #fff !important;
+  background: #236b59 !important;
+  border-color: #2c876e !important;
+}
+
+body.dark-theme .btn.danger,
+body.dark-theme #clearDataBtn {
+  color: #ffb1ae !important;
+  background: #351d21 !important;
+  border-color: #754047 !important;
+}
+
+body.dark-theme .btn.danger:hover,
+body.dark-theme #clearDataBtn:hover {
+  background: #482329 !important;
+}
+
+body.dark-theme .btn.secondary,
+body.dark-theme .file-btn {
+  color: var(--text) !important;
+  background: #0d2a21 !important;
+  border-color: #285746 !important;
+}
+
+body.dark-theme .btn:hover,
+body.dark-theme .icon-btn:hover,
+body.dark-theme .mini-btn:hover,
+body.dark-theme .icon-mini:hover,
+body.dark-theme .month-display:hover,
+body.dark-theme .custom-select-trigger:hover {
+  color: var(--text) !important;
+  background: #12382c !important;
+  border-color: #2b8064 !important;
+}
+
+body.dark-theme .mini-btn.danger {
+  color: #fff !important;
+  background: #c83b48 !important;
+  border-color: #c83b48 !important;
+}
+
+/* Toast/message box: never use the light text variable as its background. */
+body.dark-theme .toast {
+  background: #0d2a21 !important;
+  color: #f3fbf7 !important;
+  border: 1px solid #2b8064 !important;
+  box-shadow: 0 14px 34px rgba(0,0,0,.38) !important;
+}
+
+/* Keep the top utility controls visible and readable on narrow screens. */
+@media(max-width:700px){
+  body.dark-theme .top-actions .btn,
+  body.dark-theme .top-actions .file-btn {
+    color: var(--text) !important;
+    text-shadow: none !important;
+  }
+  body.dark-theme .top-actions #exportCsvBtn {
+    color: #fff !important;
+    background: #176f5a !important;
+  }
+  body.dark-theme .top-actions #clearDataBtn {
+    color: #ffb1ae !important;
+    background: #351d21 !important;
+  }
 }
