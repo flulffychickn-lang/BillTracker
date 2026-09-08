@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bill Tracker</title>
+  <meta name="theme-color" content="#0aa37e">
+  <meta name="description" content="A simple personal bill, expense, bank and cash tracker.">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icon-192.png" type="image/png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand-block">
+        <div class="eyebrow">PERSONAL FINANCE</div>
+        <h1>BILL TRACKER</h1>
+        <p class="subtitle">Bills, spending, banks, withdrawals and cash — kept simple.</p>
+      </div>
+      <div class="top-actions">
+        <button class="btn secondary" id="exportBtn" type="button">↥ Backup</button>
+        <label class="btn secondary file-btn" for="importInput">↧ Import</label>
+        <button class="btn info" id="exportCsvBtn" type="button">▤ Excel Report</button>
+        <input type="file" id="importInput" accept="application/json,.json" hidden>
+      </div>
+    </header>
+
+    <nav class="tabs" aria-label="Main navigation">
+      <button class="tab active" type="button" data-section="dashboard">🏠 Dashboard</button>
+      <button class="tab" type="button" data-section="bills">🧾 Bills</button>
+      <button class="tab" type="button" data-section="cash">🏦 Bank & Cash</button>
+      <button class="tab" type="button" data-section="reports">📊 Reports</button>
+    </nav>
+
+    <main>
+      <section class="section active" id="dashboard">
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow">OVERVIEW</span>
+            <h2 id="dashboardMonthTitle">September 2026</h2>
+          </div>
+          <div class="month-control" aria-label="Dashboard month">
+            <button class="icon-btn" id="prevMonthBtn" type="button" aria-label="Previous month">‹</button>
+            <button class="month-display" id="dashboardMonthDisplay" type="button">September 2026</button>
+            <input type="month" id="dashboardMonth" aria-label="Select dashboard month">
+            <button class="icon-btn" id="nextMonthBtn" type="button" aria-label="Next month">›</button>
+          </div>
+        </div>
+
+        <div class="stat-grid">
+          <article class="stat-card accent"><span>Monthly Expenses</span><strong id="statTotalExpenses">₱0.00</strong><small>Paid bills & expenses</small></article>
+          <article class="stat-card"><span>Total Bills & Expenses</span><strong id="statTotalBillsExpenses">₱0.00</strong><small>Paid + unpaid for this month</small></article>
+          <article class="stat-card"><span>Bills Paid</span><strong id="statBillsPaid">₱0.00</strong><small id="statBillsPaidCount">0 paid</small></article>
+          <article class="stat-card"><span>Bills Remaining</span><strong id="statBillsRemaining">₱0.00</strong><small id="statBillsRemainingCount">0 unpaid</small></article>
+          <article class="stat-card"><span>Cash in Hand</span><strong id="statCash">₱0.00</strong><small>Current physical cash</small></article>
+        </div>
+
+        <div class="dashboard-grid">
+          <article class="card cash-summary-card">
+            <div class="card-title-row">
+              <div><span class="eyebrow">BANK POSITION</span><h3>Money Available</h3></div>
+              <button class="btn small" type="button" data-go="cash">Manage</button>
+            </div>
+            <div class="money-hero"><span>Total Available</span><strong id="totalAvailable">₱0.00</strong></div>
+            <div id="bankBalancesList" class="bank-list"></div>
+          </article>
+
+          <article class="card upcoming-card">
+            <div class="card-title-row">
+              <div><span class="eyebrow">NEXT DUE</span><h3>Upcoming Bills</h3></div>
+              <button class="btn small" type="button" data-go="bills">View all</button>
+            </div>
+            <div id="upcomingBills" class="list"></div>
+          </article>
+        </div>
+
+        <div class="dashboard-grid second-row">
+          <article class="card">
+            <div class="card-title-row"><div><span class="eyebrow">SPENDING</span><h3>Monthly Category Breakdown</h3></div></div>
+            <div id="categoryBreakdown" class="category-list"></div>
+          </article>
+          <article class="card">
+            <div class="card-title-row">
+              <div><span class="eyebrow">RECENT ACTIVITY</span><h3>Latest Bills</h3></div>
+              <button class="btn small" type="button" data-go="bills">Manage bills</button>
+            </div>
+            <div id="recentTransactions" class="list"></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="bills">
+        <div class="section-heading">
+          <div><span class="eyebrow">BILLS & SPENDING</span><h2>Manage Bills & Expenses</h2></div>
+          <button class="btn primary prominent" id="addBillBtn" type="button">＋ Add Bill / Expense</button>
+        </div>
+        <div class="tip-banner"><strong>One simple form for bills and everyday spending.</strong> Payment Source is optional and limited to two choices: Cash or GCash. Bank accounts and physical cash withdrawals are managed separately in Bank & Cash.</div>
+        <div class="toolbar card compact">
+          <input type="search" id="billSearch" placeholder="Search bills or spending…" aria-label="Search bills">
+          <select id="billStatusFilter" aria-label="Filter by status"><option value="all">All statuses</option><option value="unpaid">Unpaid</option><option value="paid">Paid</option></select>
+          <select id="billCategoryFilter" aria-label="Filter by category"><option value="all">All categories</option></select>
+        </div>
+        <div class="card table-card">
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Bill / Expense</th><th>Category</th><th>Due / Date</th><th>Amount</th><th>Status</th><th>Payment</th><th>Actions</th></tr></thead>
+              <tbody id="billsTableBody"></tbody>
+            </table>
+          </div>
+          <div id="billsEmpty" class="empty-state hidden">No bills or spending records found.</div>
+        </div>
+      </section>
+
+      <section class="section" id="cash">
+        <div class="section-heading">
+          <div><span class="eyebrow">BANK & CASH</span><h2>Money Position</h2></div>
+          <div class="button-row">
+            <button class="btn secondary" id="addBankBtn" type="button">＋ Add Bank</button>
+            <button class="btn info" id="addTransactionBtn" type="button">＋ Bank Transaction</button>
+            <button class="btn transfer" id="addTransferBtn" type="button">⇄ Fast Transfer</button>
+            <button class="btn primary prominent" id="addWithdrawalBtn" type="button">＋ Cash Withdrawal</button>
+          </div>
+        </div>
+
+        <div class="stat-grid three">
+          <article class="stat-card"><span>Total Bank Balance</span><strong id="totalBankBalance">₱0.00</strong><small>Across all banks</small></article>
+          <article class="stat-card"><span>Cash in Hand</span><strong id="cashInHand">₱0.00</strong><small>Physical cash</small></article>
+          <article class="stat-card accent"><span>Total Available</span><strong id="cashTotalAvailable">₱0.00</strong><small>Bank + cash</small></article>
+        </div>
+
+        <div class="card">
+          <div class="card-title-row"><div><span class="eyebrow">BANK ACCOUNTS</span><h3>Current Balances</h3></div></div>
+          <div id="bankCards" class="bank-grid"></div>
+        </div>
+
+        <div class="card table-card">
+          <div class="card-title-row"><div><span class="eyebrow">PHYSICAL CASH</span><h3>Cash Withdrawal History</h3></div></div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Date</th><th>Bank</th><th>Money Withdrawn</th><th>Cash Used</th><th>Cash Remaining</th><th>Notes</th><th>Actions</th></tr></thead>
+              <tbody id="withdrawalsTableBody"></tbody>
+            </table>
+          </div>
+          <div id="withdrawalsEmpty" class="empty-state hidden">No cash withdrawals yet.</div>
+        </div>
+
+        <div class="card table-card">
+          <div class="card-title-row"><div><span class="eyebrow">BANK ACTIVITY</span><h3>Bank Transactions & Transfers</h3></div></div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Date</th><th>Bank</th><th>Type</th><th>Amount</th><th>Notes</th><th>Actions</th></tr></thead>
+              <tbody id="bankTransactionsTableBody"></tbody>
+            </table>
+          </div>
+          <div id="bankTransactionsEmpty" class="empty-state hidden">No bank transactions yet.</div>
+        </div>
+      </section>
+
+      <section class="section" id="reports">
+        <div class="section-heading">
+          <div><span class="eyebrow">REPORTS</span><h2>Monthly Reports</h2></div>
+          <div class="report-month-wrap"><label for="reportMonthDisplay">Month</label><button class="month-display report" id="reportMonthDisplay" type="button">September 2026</button><input type="month" id="reportMonth" aria-label="Report month"></div>
+        </div>
+        <div class="stat-grid three">
+          <article class="stat-card"><span>Monthly Expenses</span><strong id="reportTotal">₱0.00</strong><small id="reportMonthLabel">Selected month</small></article>
+          <article class="stat-card accent"><span>Total Bills & Expenses</span><strong id="reportGrandTotal">₱0.00</strong><small>Paid + unpaid for this month</small></article>
+          <article class="stat-card"><span>Bills Paid</span><strong id="reportPaid">₱0.00</strong><small>Paid during selected month</small></article>
+          <article class="stat-card"><span>Bills Outstanding</span><strong id="reportOutstanding">₱0.00</strong><small>Due in selected month</small></article>
+        </div>
+        <div class="dashboard-grid">
+          <article class="card"><span class="eyebrow">CATEGORY</span><h3>Expense Breakdown</h3><div id="reportCategories" class="category-list large"></div></article>
+          <article class="card"><span class="eyebrow">MONTH COMPARISON</span><h3>Recent Monthly Totals</h3><div id="monthlyHistory" class="history-list"></div></article>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">Bats</footer>
+  </div>
+
+  <dialog id="modal">
+    <form id="modalForm" novalidate>
+      <div class="modal-head">
+        <div><span class="eyebrow" id="modalEyebrow">ENTRY</span><h3 id="modalTitle">Add</h3></div>
+        <button class="icon-btn" id="modalCloseBtn" type="button" aria-label="Close">×</button>
+      </div>
+      <div id="modalBody"></div>
+      <div class="modal-actions"><button class="btn secondary" id="modalCancelBtn" type="button">Cancel</button><button class="btn primary prominent" id="modalSaveBtn" type="submit">Save</button></div>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="app.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+    }
+  </script>
+</body>
+</html>
