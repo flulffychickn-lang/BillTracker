@@ -1,0 +1,15 @@
+# Local backup files
+bill-tracker-backup*.json
+
+# Exported reports
+bill-tracker-report*.csv
+bill-tracker-report*.xlsx
+
+# Local data folders
+backups/
+data/
+
+# Editor / operating-system files
+.vscode/
+.DS_Store
+Thumbs.db
