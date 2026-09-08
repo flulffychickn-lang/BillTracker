@@ -164,7 +164,24 @@
     return out;
   }
 
+  function applyTheme(theme) {
+    const dark = theme === 'dark';
+    document.body.classList.toggle('dark-theme', dark);
+    const btn = document.getElementById('themeToggle');
+    if (btn) {
+      btn.textContent = dark ? '☀ Light Theme' : '☾ Dark Theme';
+      btn.setAttribute('aria-pressed', String(dark));
+    }
+  }
+
+  function initTheme() {
+    const saved = localStorage.getItem('billTrackerTheme');
+    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    applyTheme(saved || (prefersDark ? 'dark' : 'light'));
+  }
+
   function init() {
+    initTheme();
     const baseMonth = state.settings.defaultMonth || monthKey(localToday());
     ['dashboardMonth','reportMonth'].forEach(id => document.getElementById(id).value = baseMonth);
     document.querySelectorAll('.tab').forEach(btn => btn.addEventListener('click', () => switchSection(btn.dataset.section)));
@@ -187,6 +204,7 @@
     document.getElementById('exportCsvBtn').addEventListener('click', exportExcelReport);
     document.getElementById('importInput').addEventListener('change', importBackup);
     document.getElementById('clearDataBtn').addEventListener('click', clearAllData);
+    document.getElementById('themeToggle').addEventListener('click', () => { const next = document.body.classList.contains('dark-theme') ? 'light' : 'dark'; localStorage.setItem('billTrackerTheme', next); applyTheme(next); });
     document.getElementById('modalCloseBtn').addEventListener('click', closeModal);
     document.getElementById('modalCancelBtn').addEventListener('click', closeModal);
     document.getElementById('modalForm').addEventListener('submit', e => { e.preventDefault(); const result = editor?.(); if (result !== false) closeModal(); });
