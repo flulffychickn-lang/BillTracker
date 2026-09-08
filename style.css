@@ -416,3 +416,145 @@ body.dark-theme .theme-toggle{background:#25332f;border-color:#41544d;color:#f3f
 @media(max-width:700px){
   .theme-toggle{grid-column:1/-1;justify-self:center;width:min(220px,100%)}
 }
+\n\n/* =========================================================\n   V8.3.9 THEME ICON + MOBILE MONTH PICKER + DATE FIX\n   ========================================================= */\n.title-row{display:flex;align-items:center;justify-content:center;gap:10px;min-width:0}\n.title-row h1{margin:0}\n.theme-icon{width:38px;height:38px;border:1px solid #cbded6;border-radius:50%;background:rgba(255,255,255,.82);color:var(--text);display:inline-grid;place-items:center;font-size:19px;line-height:1;box-shadow:0 4px 12px rgba(32,78,64,.08);transition:.16s ease}\n.theme-icon:hover{background:var(--accent-soft);border-color:#a9d9c9;transform:translateY(-1px)}\nbody.dark-theme .theme-icon{background:#1a2824;border-color:#41544d;color:#f3fbf8}\n\n.month-picker-popover{position:fixed;z-index:20000;background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:14px;padding:10px;box-shadow:0 18px 45px rgba(11,23,45,.24);max-width:calc(100vw - 16px)}\n.month-picker-head{display:grid;grid-template-columns:40px 1fr 40px;align-items:center;gap:8px;margin-bottom:9px;text-align:center;font-size:17px}\n.month-picker-nav{width:40px;height:40px;border:1px solid var(--border);border-radius:10px;background:var(--panel);color:var(--text);font-size:23px;line-height:1}\n.month-picker-nav:hover{background:var(--accent-soft);border-color:var(--accent)}\n.month-picker-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}\n.month-picker-option{min-height:42px;border:1px solid var(--border);border-radius:9px;background:var(--panel);color:var(--text);font-weight:750}\n.month-picker-option:hover,.month-picker-option:focus-visible{background:var(--accent-soft);border-color:var(--accent);outline:none}\n.month-picker-option.selected{background:var(--accent);border-color:var(--accent);color:#fff}\n.month-picker-today{width:100%;margin-top:8px;min-height:38px;border:0;border-radius:9px;background:var(--accent-soft);color:var(--accent-strong);font-weight:850}\nbody.dark-theme .month-picker-nav,body.dark-theme .month-picker-option{background:#1a2824;color:var(--text);border-color:#334740}\nbody.dark-theme .month-picker-option:hover,body.dark-theme .month-picker-option:focus-visible{background:#203a32}\nbody.dark-theme .month-picker-option.selected{background:var(--accent);color:#fff}\nbody.dark-theme .month-picker-today{background:#15382f;color:#5de0b8}\n\ninput[type="date"]{width:100% !important;min-width:0 !important;max-width:100% !important;box-sizing:border-box !important;display:block}\n@media(max-width:700px){\n  .title-row{gap:8px}\n  .theme-icon{width:36px;height:36px;font-size:18px}\n  .field input[type="date"]{min-inline-size:0 !important;inline-size:100% !important;padding-left:12px;padding-right:12px}\n  .month-picker-popover{padding:9px;border-radius:13px}\n  .month-picker-grid{gap:5px}\n  .month-picker-option{min-height:44px;font-size:15px}\n}\n@media(max-width:430px){\n  .theme-icon{width:34px;height:34px;font-size:17px}\n  .month-picker-popover{width:calc(100vw - 16px) !important;left:8px !important}\n}\n
+
+/* =========================================================
+   V8.3.11 INLINE MONTH PICKER — MOBILE RELIABLE
+   ========================================================= */
+.month-picker-overlay{
+  position:fixed;
+  inset:0;
+  z-index:50000;
+  display:grid;
+  place-items:center;
+  padding:16px;
+  background:rgba(8,20,17,.52);
+  -webkit-backdrop-filter:blur(3px);
+  backdrop-filter:blur(3px);
+}
+.month-picker-panel{
+  width:min(390px,100%);
+  max-height:min(620px,calc(100dvh - 32px));
+  overflow:auto;
+  background:var(--panel);
+  color:var(--text);
+  border:1px solid var(--border);
+  border-radius:20px;
+  padding:16px;
+  box-shadow:0 24px 70px rgba(0,0,0,.28);
+  -webkit-overflow-scrolling:touch;
+}
+.month-picker-title-row{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:12px}
+.month-picker-title-row h3{margin:2px 0 0;font-size:20px}
+.month-picker-close{width:42px;height:42px;flex:0 0 42px;border:1px solid var(--border);border-radius:12px;background:var(--panel);color:var(--text);font-size:27px;line-height:1}
+.month-picker-close:active,.month-picker-nav:active,.month-picker-option:active,.month-picker-today:active{transform:scale(.98)}
+.month-picker-panel .month-picker-head{display:grid;grid-template-columns:48px 1fr 48px;align-items:center;gap:10px;margin-bottom:12px;text-align:center;font-size:19px}
+.month-picker-panel .month-picker-nav{width:48px;height:44px;border:1px solid var(--border);border-radius:11px;background:var(--panel);color:var(--text);font-size:25px;line-height:1}
+.month-picker-panel .month-picker-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.month-picker-panel .month-picker-option{min-height:48px;border:1px solid var(--border);border-radius:11px;background:var(--panel);color:var(--text);font-weight:800;font-size:15px;touch-action:manipulation}
+.month-picker-panel .month-picker-option:hover,.month-picker-panel .month-picker-option:focus-visible{background:var(--accent-soft);border-color:var(--accent);outline:none}
+.month-picker-panel .month-picker-option.selected{background:var(--accent);border-color:var(--accent);color:#fff}
+.month-picker-panel .month-picker-today{width:100%;margin-top:10px;min-height:44px;border:0;border-radius:11px;background:var(--accent-soft);color:var(--accent-strong);font-weight:850;font-size:15px;touch-action:manipulation}
+body.dark-theme .month-picker-panel .month-picker-nav,
+body.dark-theme .month-picker-panel .month-picker-option,
+body.dark-theme .month-picker-close{background:#1a2824;color:var(--text);border-color:#334740}
+body.dark-theme .month-picker-panel .month-picker-option:hover,
+body.dark-theme .month-picker-panel .month-picker-option:focus-visible{background:#203a32}
+body.dark-theme .month-picker-panel .month-picker-option.selected{background:var(--accent);color:#fff}
+body.dark-theme .month-picker-panel .month-picker-today{background:#15382f;color:#5de0b8}
+@media(max-width:430px){
+  .month-picker-overlay{padding:10px}
+  .month-picker-panel{padding:14px;border-radius:18px;max-height:calc(100dvh - 20px)}
+  .month-picker-panel .month-picker-grid{gap:6px}
+  .month-picker-panel .month-picker-option{min-height:46px}
+}
+
+
+/* =========================================================
+   V8.3.11 INLINE MONTH PICKER — MOBILE RELIABLE
+   ========================================================= */
+.month-picker-inline{position:relative;min-width:0;display:inline-block}
+.month-picker-inline>input[type="month"]{position:absolute!important;width:1px!important;height:1px!important;opacity:0!important;pointer-events:none!important}
+.month-picker-menu{display:none;position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%);z-index:60000;width:min(320px,calc(100vw - 24px));padding:12px;background:var(--panel);border:1px solid var(--border);border-radius:16px;box-shadow:0 18px 50px rgba(11,23,45,.25)}
+.month-picker-inline.open .month-picker-menu{display:block}
+.month-menu-head{display:grid;grid-template-columns:42px 1fr 42px;align-items:center;gap:8px;text-align:center;margin-bottom:9px}
+.month-picker-menu .month-picker-nav{width:42px;height:40px}
+.month-picker-menu .month-picker-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.month-picker-menu .month-picker-option{min-height:42px}
+.month-picker-menu .month-picker-today{width:100%;margin-top:8px;min-height:40px}
+@media(max-width:700px){
+  .month-picker-inline{width:100%;min-width:0}
+  .month-control .month-picker-inline{flex:1}
+  .month-picker-inline .month-display{width:100%;min-width:0}
+  .report-month-wrap .month-picker-inline{width:100%}
+  .month-picker-menu{position:fixed;top:auto;bottom:12px;left:50%;transform:translateX(-50%);width:calc(100vw - 20px);max-width:390px;padding:14px;border-radius:18px}
+  .month-picker-inline.open::after{content:"";position:fixed;inset:0;background:rgba(8,20,17,.35);z-index:59999}
+  .month-picker-menu{z-index:60000}
+}
+@media(max-width:430px){
+  .month-picker-menu{width:calc(100vw - 20px)}
+}
+
+/* =========================================================
+   V8.3.12 — ANCHORED MONTH PICKER
+   Opens directly below the existing month field.
+   ========================================================= */
+.month-picker-inline{position:relative;min-width:0;display:inline-block}
+.month-picker-inline .month-picker-menu{
+  display:none;
+  position:absolute;
+  top:calc(100% + 8px);
+  left:50%;
+  transform:translateX(-50%);
+  z-index:60000;
+  width:min(330px, calc(100vw - 24px));
+  max-width:calc(100vw - 24px);
+  padding:14px;
+  background:var(--panel);
+  color:var(--text);
+  border:1px solid var(--border);
+  border-radius:16px;
+  box-shadow:0 18px 50px rgba(11,23,45,.28);
+}
+.month-picker-inline.open .month-picker-menu{display:block}
+.month-picker-inline.open .month-picker-menu::before{
+  content:"";
+  position:absolute;
+  top:-8px;
+  left:50%;
+  width:15px;
+  height:15px;
+  background:var(--panel);
+  border-left:1px solid var(--border);
+  border-top:1px solid var(--border);
+  transform:translateX(-50%) rotate(45deg);
+}
+.month-picker-title-row{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px}
+.month-picker-title-row .eyebrow{margin:0}
+.month-picker-subtitle{display:block;font-size:18px;line-height:1.2;margin-top:2px}
+.month-picker-close{width:40px;height:40px;flex:0 0 40px;border:1px solid var(--border);border-radius:10px;background:var(--panel);color:var(--text);font-size:25px;line-height:1}
+.month-picker-menu .month-picker-head{display:grid;grid-template-columns:42px 1fr 42px;align-items:center;gap:8px;margin-bottom:9px;text-align:center;font-size:18px}
+.month-picker-menu .month-picker-nav{width:42px;height:40px;border:1px solid var(--border);border-radius:10px;background:var(--panel);color:var(--text);font-size:23px;line-height:1}
+.month-picker-menu .month-picker-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.month-picker-menu .month-picker-option{min-height:42px;border:1px solid var(--border);border-radius:9px;background:var(--panel);color:var(--text);font-weight:800}
+.month-picker-menu .month-picker-option:hover,.month-picker-menu .month-picker-option:focus-visible{background:var(--accent-soft);border-color:var(--accent);outline:none}
+.month-picker-menu .month-picker-option.selected{background:var(--accent);border-color:var(--accent);color:#fff}
+.month-picker-menu .month-picker-today{width:100%;margin-top:8px;min-height:40px;border:0;border-radius:9px;background:var(--accent-soft);color:var(--accent-strong);font-weight:850}
+body.dark-theme .month-picker-inline .month-picker-menu{background:#111c19;color:var(--text);border-color:#334740}
+body.dark-theme .month-picker-inline.open .month-picker-menu::before{background:#111c19;border-color:#334740}
+body.dark-theme .month-picker-menu .month-picker-nav,
+body.dark-theme .month-picker-menu .month-picker-option,
+body.dark-theme .month-picker-close{background:#1a2824;color:var(--text);border-color:#334740}
+body.dark-theme .month-picker-menu .month-picker-option:hover,
+body.dark-theme .month-picker-menu .month-picker-option:focus-visible{background:#203a32}
+body.dark-theme .month-picker-menu .month-picker-option.selected{background:var(--accent);color:#fff}
+body.dark-theme .month-picker-menu .month-picker-today{background:#15382f;color:#5de0b8}
+@media(max-width:700px){
+  .month-picker-inline{width:100%}
+  .month-control .month-picker-inline{flex:1}
+  .report-month-wrap .month-picker-inline{flex:1}
+  .month-picker-inline .month-display{width:100%;min-width:0}
+  .month-picker-inline .month-picker-menu{left:0;transform:none;width:100%;max-width:100%;top:calc(100% + 8px);padding:12px}
+  .month-picker-inline.open .month-picker-menu::before{left:50%;}
+  .month-picker-menu .month-picker-option{min-height:44px;font-size:15px}
+}

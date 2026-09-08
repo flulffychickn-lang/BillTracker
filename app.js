@@ -169,8 +169,10 @@
     document.body.classList.toggle('dark-theme', dark);
     const btn = document.getElementById('themeToggle');
     if (btn) {
-      btn.textContent = dark ? '☀ Light Theme' : '☾ Dark Theme';
+      btn.textContent = dark ? '☀' : '☾';
       btn.setAttribute('aria-pressed', String(dark));
+      btn.setAttribute('aria-label', dark ? 'Switch to light theme' : 'Switch to dark theme');
+      btn.setAttribute('title', dark ? 'Switch to light theme' : 'Switch to dark theme');
     }
   }
 
@@ -212,9 +214,131 @@
     enhanceSelects();
   }
 
+  // Anchored month picker: opens directly beneath the month field.
+  // This avoids full-screen overlays and works reliably on desktop and mobile.
+  let monthPickerState = null;
+  let monthPickerOutsideHandlerAttached = false;
+
+  function closeMonthPicker() {
+    document.querySelectorAll('.month-picker-inline.open').forEach(el => {
+      el.classList.remove('open');
+      const display = el.querySelector('.month-display');
+      if (display) display.setAttribute('aria-expanded', 'false');
+    });
+    monthPickerState = null;
+  }
+
   function openMonthPicker(id) {
-    const el = document.getElementById(id);
-    try { if (typeof el.showPicker === 'function') el.showPicker(); else el.focus(); } catch { el.focus(); }
+    const input = document.getElementById(id);
+    if (!input) return;
+
+    const wrapperId = id === 'dashboardMonth' ? 'dashboardMonthPicker' : 'reportMonthPicker';
+    const wrapper = document.getElementById(wrapperId);
+    const menu = wrapper?.querySelector('.month-picker-menu');
+    const display = wrapper?.querySelector('.month-display');
+    if (!wrapper || !menu || !display) return;
+
+    const current = input.value || monthKey(localToday());
+    const [currentYear] = current.split('-').map(Number);
+    monthPickerState = {
+      id,
+      year: currentYear || new Date().getFullYear(),
+      value: current
+    };
+
+    // Close any other month picker first.
+    document.querySelectorAll('.month-picker-inline.open').forEach(el => {
+      if (el !== wrapper) {
+        el.classList.remove('open');
+        el.querySelector('.month-display')?.setAttribute('aria-expanded', 'false');
+      }
+    });
+
+    wrapper.classList.add('open');
+    display.setAttribute('aria-expanded', 'true');
+
+    const renderPicker = () => {
+      const y = monthPickerState.year;
+      const selected = input.value || monthPickerState.value || monthKey(localToday());
+      const selectedYear = Number(selected.slice(0, 4));
+      const selectedMonth = Number(selected.slice(5, 7));
+
+      menu.innerHTML = `
+        <div class="month-picker-title-row">
+          <div>
+            <span class="eyebrow">SELECT MONTH</span>
+            <strong class="month-picker-subtitle">Choose a month</strong>
+          </div>
+          <button type="button" class="month-picker-close" aria-label="Close month picker">×</button>
+        </div>
+        <div class="month-picker-head">
+          <button type="button" class="month-picker-nav" data-year="-1" aria-label="Previous year">‹</button>
+          <strong>${y}</strong>
+          <button type="button" class="month-picker-nav" data-year="1" aria-label="Next year">›</button>
+        </div>
+        <div class="month-picker-grid">
+          ${Array.from({length: 12}, (_, i) => {
+            const active = y === selectedYear && (i + 1) === selectedMonth;
+            const name = new Date(y, i, 1).toLocaleString('en-US', { month: 'short' });
+            return `<button type="button" class="month-picker-option${active ? ' selected' : ''}" data-month="${pad(i + 1)}">${name}</button>`;
+          }).join('')}
+        </div>
+        <button type="button" class="month-picker-today" data-today="1">This month</button>`;
+
+      menu.querySelector('.month-picker-close')?.addEventListener('click', e => {
+        e.preventDefault();
+        e.stopPropagation();
+        closeMonthPicker();
+      });
+
+      menu.querySelectorAll('[data-year]').forEach(btn => btn.addEventListener('click', e => {
+        e.preventDefault();
+        e.stopPropagation();
+        monthPickerState.year += Number(btn.dataset.year);
+        renderPicker();
+      }));
+
+      menu.querySelectorAll('[data-month]').forEach(btn => btn.addEventListener('click', e => {
+        e.preventDefault();
+        e.stopPropagation();
+        const value = `${monthPickerState.year}-${btn.dataset.month}`;
+        setSelectedMonth(id, value);
+        closeMonthPicker();
+      }));
+
+      menu.querySelector('[data-today]')?.addEventListener('click', e => {
+        e.preventDefault();
+        e.stopPropagation();
+        setSelectedMonth(id, monthKey(localToday()));
+        closeMonthPicker();
+      });
+    };
+
+    renderPicker();
+
+    if (!monthPickerOutsideHandlerAttached) {
+      document.addEventListener('click', e => {
+        const active = document.querySelector('.month-picker-inline.open');
+        if (active && !active.contains(e.target)) closeMonthPicker();
+      }, true);
+      monthPickerOutsideHandlerAttached = true;
+    }
+  }
+
+  function setSelectedMonth(id, value) {
+    const input = document.getElementById(id);
+    if (!input) return;
+    input.value = value;
+
+    // Keep Dashboard and Reports synchronized so the same selected month is
+    // always reflected in both places.
+    const otherId = id === 'dashboardMonth' ? 'reportMonth' : 'dashboardMonth';
+    const other = document.getElementById(otherId);
+    if (other) other.value = value;
+
+    state.settings.defaultMonth = value;
+    persistOnly();
+    renderAll();
   }
 
   function switchSection(id) {
