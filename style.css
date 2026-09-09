@@ -872,3 +872,45 @@ body.dark-theme .toast {
     padding:0 !important;
   }
 }
+
+/* V8.3.17 — iOS date control containment fix.
+   Safari's native date renderer can keep an intrinsic inline size even when
+   width:100% is applied. Remove that native appearance on narrow screens so
+   the control obeys the modal/field width exactly. Tapping it still opens the
+   system date picker. */
+@media (max-width:700px){
+  #modal .field input[type="date"]{
+    -webkit-appearance:none !important;
+    appearance:none !important;
+    display:block !important;
+    width:100% !important;
+    inline-size:100% !important;
+    min-width:0 !important;
+    min-inline-size:0 !important;
+    max-width:100% !important;
+    max-inline-size:100% !important;
+    box-sizing:border-box !important;
+    margin:0 !important;
+    padding:12px 14px !important;
+    border-radius:12px !important;
+    text-align:left !important;
+    text-align-last:left !important;
+    overflow:hidden !important;
+  }
+
+  #modal .field input[type="date"]::-webkit-date-and-time-value{
+    width:100% !important;
+    min-width:0 !important;
+    margin:0 !important;
+    padding:0 !important;
+    text-align:left !important;
+  }
+
+  /* Keep the date value visually aligned with every other form field. */
+  #modal .field input[type="date"]::-webkit-datetime-edit,
+  #modal .field input[type="date"]::-webkit-datetime-edit-fields-wrapper{
+    padding:0 !important;
+    margin:0 !important;
+    text-align:left !important;
+  }
+}
