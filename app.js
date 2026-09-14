@@ -2,7 +2,7 @@
   'use strict';
 
   const STORAGE_KEY = 'billTrackerV4';
-  const CATEGORIES = ['Water','Electricity','Internet','Car Expenses','Food','Others'];
+  const CATEGORIES = ['Water','Electricity','Internet','Car Expenses','Food','Travel','Household','Others'];
 
   const money = n => new Intl.NumberFormat('en-PH', {style:'currency', currency:'PHP'}).format(Number(n) || 0);
   const uid = prefix => `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2,8)}`;
