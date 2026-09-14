@@ -914,3 +914,16 @@ body.dark-theme .toast {
     text-align:left !important;
   }
 }
+
+/* Small mobile usability fixes: keep long record lists inside their own scroll area. */
+.records-scroll{max-height:430px;overflow-y:auto;overflow-x:auto;overscroll-behavior:contain;scrollbar-gutter:stable;}
+.records-scroll table{margin:0;}
+.records-scroll thead th{position:sticky;top:0;z-index:2;}
+@media(max-width:700px){
+  .records-scroll{max-height: min(62vh, 430px);overflow-y:auto;overflow-x:hidden;}
+  .records-scroll table{display:block;}
+  .records-scroll tbody{display:grid;}
+  .records-scroll tr{min-width:0;}
+  .list-row>div:last-child{display:flex;flex-direction:column;align-items:flex-end;justify-content:center;gap:5px;min-width:72px;text-align:right;}
+  .list-row .badge{align-self:flex-end;white-space:nowrap;}
+}

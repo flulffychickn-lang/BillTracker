@@ -106,7 +106,7 @@
           <select id="billCategoryFilter" aria-label="Filter by category"><option value="all">All categories</option></select>
         </div>
         <div class="card table-card">
-          <div class="table-wrap">
+          <div class="table-wrap records-scroll bills-records-scroll">
             <table>
               <thead><tr><th>Bill / Expense</th><th>Category</th><th>Due / Date</th><th>Amount</th><th>Status</th><th>Payment</th><th>Actions</th></tr></thead>
               <tbody id="billsTableBody"></tbody>
@@ -140,7 +140,7 @@
 
         <div class="card table-card">
           <div class="card-title-row"><div><span class="eyebrow">PHYSICAL CASH</span><h3>Cash Withdrawal History</h3></div></div>
-          <div class="table-wrap">
+          <div class="table-wrap records-scroll cash-records-scroll">
             <table>
               <thead><tr><th>Date</th><th>Bank</th><th>Money Withdrawn</th><th>Cash Used</th><th>Cash Remaining</th><th>Notes</th><th>Actions</th></tr></thead>
               <tbody id="withdrawalsTableBody"></tbody>
@@ -151,7 +151,7 @@
 
         <div class="card table-card">
           <div class="card-title-row"><div><span class="eyebrow">BANK ACTIVITY</span><h3>Bank Transactions & Transfers</h3></div></div>
-          <div class="table-wrap">
+          <div class="table-wrap records-scroll bank-records-scroll">
             <table>
               <thead><tr><th>Date</th><th>Bank</th><th>Type</th><th>Amount</th><th>Notes</th><th>Actions</th></tr></thead>
               <tbody id="bankTransactionsTableBody"></tbody>
