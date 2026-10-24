@@ -31,7 +31,6 @@
       <button class="tab active" type="button" data-section="dashboard">🏠 Dashboard</button>
       <button class="tab" type="button" data-section="bills">🧾 Bills</button>
       <button class="tab" type="button" data-section="cash">🏦 Bank & Cash</button>
-      <button class="tab" type="button" data-section="reports">📊 Reports</button>
     </nav>
 
     <main>
@@ -92,7 +91,27 @@
             <div id="recentTransactions" class="list"></div>
           </article>
         </div>
+      
+
+      <div class="dashboard-reports" id="reports">
+        <div class="section-heading reports-heading">
+          <div><span class="eyebrow">REPORTS</span><h2>Monthly Reports</h2></div>
+          <div class="report-month-wrap"><label for="reportMonthDisplay">Month</label><div class="month-picker-inline" id="reportMonthPicker"><button class="month-display report" id="reportMonthDisplay" type="button" aria-haspopup="dialog" aria-expanded="false">September 2026</button><div class="month-picker-menu" id="reportMonthMenu"></div><input type="month" id="reportMonth" aria-label="Report month"></div></div>
+        </div>
+        <div class="stat-grid three">
+          <article class="stat-card"><span>Monthly Expenses</span><strong id="reportTotal">₱0.00</strong><small id="reportMonthLabel">Selected month</small></article>
+          <article class="stat-card accent"><span>Total Bills & Expenses</span><strong id="reportGrandTotal">₱0.00</strong><small>Paid + unpaid for this month</small></article>
+          <article class="stat-card"><span>Bills Paid</span><strong id="reportPaid">₱0.00</strong><small>Paid during selected month</small></article>
+          <article class="stat-card"><span>Bills Outstanding</span><strong id="reportOutstanding">₱0.00</strong><small>Due in selected month</small></article>
+        </div>
+        <div class="dashboard-grid">
+          <article class="card"><span class="eyebrow">CATEGORY</span><h3>Expense Breakdown</h3><div id="reportCategories" class="category-list large"></div></article>
+          <article class="card"><span class="eyebrow">MONTH COMPARISON</span><h3>Recent Monthly Totals</h3><div id="monthlyHistory" class="history-list"></div></article>
+        </div>
+      </div>
       </section>
+
+      
 
       <section class="section" id="bills">
         <div class="section-heading">
@@ -161,22 +180,7 @@
         </div>
       </section>
 
-      <section class="section" id="reports">
-        <div class="section-heading">
-          <div><span class="eyebrow">REPORTS</span><h2>Monthly Reports</h2></div>
-          <div class="report-month-wrap"><label for="reportMonthDisplay">Month</label><div class="month-picker-inline" id="reportMonthPicker"><button class="month-display report" id="reportMonthDisplay" type="button" aria-haspopup="dialog" aria-expanded="false">September 2026</button><div class="month-picker-menu" id="reportMonthMenu"></div><input type="month" id="reportMonth" aria-label="Report month"></div></div>
-        </div>
-        <div class="stat-grid three">
-          <article class="stat-card"><span>Monthly Expenses</span><strong id="reportTotal">₱0.00</strong><small id="reportMonthLabel">Selected month</small></article>
-          <article class="stat-card accent"><span>Total Bills & Expenses</span><strong id="reportGrandTotal">₱0.00</strong><small>Paid + unpaid for this month</small></article>
-          <article class="stat-card"><span>Bills Paid</span><strong id="reportPaid">₱0.00</strong><small>Paid during selected month</small></article>
-          <article class="stat-card"><span>Bills Outstanding</span><strong id="reportOutstanding">₱0.00</strong><small>Due in selected month</small></article>
-        </div>
-        <div class="dashboard-grid">
-          <article class="card"><span class="eyebrow">CATEGORY</span><h3>Expense Breakdown</h3><div id="reportCategories" class="category-list large"></div></article>
-          <article class="card"><span class="eyebrow">MONTH COMPARISON</span><h3>Recent Monthly Totals</h3><div id="monthlyHistory" class="history-list"></div></article>
-        </div>
-      </section>
+      
     </main>
 
     <footer class="footer">BATS</footer>

@@ -485,7 +485,7 @@
       const matchesS = status === 'all' || (status === 'paid' ? b.status === 'Paid' : b.status !== 'Paid');
       const matchesC = cat === 'all' || b.category === cat;
       return matchesQ && matchesS && matchesC;
-    }).sort((a,b) => String(a.dueDate).localeCompare(String(b.dueDate)));
+    }).sort((a,b) => String(b.dueDate).localeCompare(String(a.dueDate)));
     const body = document.getElementById('billsTableBody');
     body.innerHTML = rows.map(b => `<tr>
       <td class="notes-aware"><strong>${esc(b.name)}</strong>${b.notes ? `<span class="table-sub">${esc(b.notes)}</span>` : ''}</td>
@@ -694,7 +694,7 @@
     return `<c r="${ref}"${style} t="inlineStr"><is><t xml:space="preserve">${xmlEscape(value)}</t></is></c>`;
   }
 
-  function worksheetXml(rows, widths){
+  function worksheetXml(rows, widths, filterRef){
     let dimensionMaxCol=1;
     rows.forEach(r=>{ dimensionMaxCol=Math.max(dimensionMaxCol,r.length); });
     const dimensionMaxRow=Math.max(1,rows.length);
@@ -729,7 +729,9 @@
       });
       xml+='</row>';
     });
-    xml+='</sheetData><pageMargins left="0.25" right="0.25" top="0.5" bottom="0.5" header="0.2" footer="0.2"/></worksheet>';
+    xml+='</sheetData>';
+    if(filterRef) xml+=`<autoFilter ref="${filterRef}"/>`;
+    xml+='<pageMargins left="0.25" right="0.25" top="0.5" bottom="0.5" header="0.2" footer="0.2"/></worksheet>';
     return xml;
   }
 
@@ -896,20 +898,37 @@
       ['ID','Date','Month','Name / Description','Category','Amount (PHP)','Status','Paid Date','Payment Source','Notes']
     ];
 
-    [...state.bills]
-      .sort((a,b)=>String(a.dueDate).localeCompare(String(b.dueDate)))
-      .forEach(b=>billRows.push([
-        b.id,
-        fmtDateLong(b.dueDate),
-        monthLabel(monthKey(b.dueDate)),
-        b.name,
-        b.category,
-        Number(b.amount)||0,
-        b.status,
-        b.paidDate ? fmtDateLong(b.paidDate) : '',
-        b.paymentSource || '',
-        b.notes || ''
-      ]));
+    const sortedBills = [...state.bills]
+      .sort((a,b)=>String(b.dueDate).localeCompare(String(a.dueDate)));
+    sortedBills.forEach(b=>billRows.push([
+      b.id,
+      fmtDateLong(b.dueDate),
+      monthLabel(monthKey(b.dueDate)),
+      b.name,
+      b.category,
+      Number(b.amount)||0,
+      b.status,
+      b.paidDate ? fmtDateLong(b.paidDate) : '',
+      b.paymentSource || '',
+      b.notes || ''
+    ]));
+
+    // Keep totals outside the filter range so sorting/filtering never moves them into the records.
+    const billDataEndRow = billRows.length;
+    const allBillsGrandTotal = sortedBills.reduce((sum,b)=>sum+(Number(b.amount)||0),0);
+    billRows.push([]);
+    billRows.push(['GRAND TOTAL','','','','',allBillsGrandTotal]);
+    billRows.push([]);
+    billRows.push(['MONTHLY TOTALS','','','','','Total Amount (PHP)']);
+    const monthlyBillTotals = new Map();
+    sortedBills.forEach(b=>{
+      const key=monthKey(b.dueDate);
+      if(!key) return;
+      monthlyBillTotals.set(key,(monthlyBillTotals.get(key)||0)+(Number(b.amount)||0));
+    });
+    [...monthlyBillTotals.keys()].sort((a,b)=>b.localeCompare(a)).forEach(key=>{
+      billRows.push([monthLabel(key),'','','','',monthlyBillTotals.get(key)]);
+    });
 
     // ---------- Bank & Cash ----------
     const bankRows = [
@@ -976,10 +995,12 @@
     const reportCashInHand = reportCashWithdrawnTotal - reportCashUsedTotal + state.cashAdjustments.reduce((sum, a) => sum + (Number(a.amount) || 0), 0);
     bankRows.push(['CASH SUMMARY','Total Withdrawn',reportCashWithdrawnTotal,'Total Used',reportCashUsedTotal,'Cash in Hand',reportCashInHand]);
 
+    const monthlyHeaderIndex = dashboardRows.findIndex(r => r[0] === 'Month' && r[1] === 'Paid Bills / Expenses (PHP)');
+    const bankTransactionHeaderIndex = bankRows.findIndex(r => r[0] === 'ID' && r[1] === 'Date' && r[3] === 'Type');
     return [
-      {name:'Dashboard & Reports', rows:dashboardRows, widths:[30,34,24,28,24,18]},
-      {name:'Bills & Expenses', rows:billRows, widths:[22,15,18,30,20,16,12,15,18,45]},
-      {name:'Bank & Cash', rows:bankRows, widths:[24,15,18,24,24,24,24,45]}
+      {name:'Dashboard & Reports', rows:dashboardRows, widths:[30,34,24,28,24,18], filterRef: monthlyHeaderIndex >= 0 && dashboardRows.length > monthlyHeaderIndex+1 ? `A${monthlyHeaderIndex+1}:F${dashboardRows.length-1}` : null},
+      {name:'Bills & Expenses', rows:billRows, widths:[22,15,18,30,20,16,12,15,18,45], filterRef:billDataEndRow >= 4 ? `A4:J${billDataEndRow}` : null},
+      {name:'Bank & Cash', rows:bankRows, widths:[24,15,18,24,24,24,24,45], filterRef:bankTransactionHeaderIndex >= 0 ? `A${bankTransactionHeaderIndex+1}:H${bankRows.length}` : null}
     ];
   }
 
@@ -1028,7 +1049,7 @@ ${sheets.map((s,i)=>`  <Override PartName="/xl/worksheets/sheet${i+1}.xml" Conte
 
     sheets.forEach((sheet,i)=>files.push({
       name:`xl/worksheets/sheet${i+1}.xml`,
-      data:worksheetXml(sheet.rows,sheet.widths)
+      data:worksheetXml(sheet.rows,sheet.widths,sheet.filterRef)
     }));
 
     return zipStore(files);
