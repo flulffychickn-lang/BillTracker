@@ -939,3 +939,57 @@ body.dark-theme .toast {
 .dashboard-reports .category-list,.dashboard-reports .history-list{min-width:0;overflow-wrap:anywhere}
 @media(max-width:900px){.dashboard-reports .stat-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:620px){.dashboard-reports{margin-top:20px;padding-top:18px}.dashboard-reports .stat-grid,.dashboard-reports .dashboard-grid{grid-template-columns:minmax(0,1fr)}.dashboard-reports .report-month-wrap{width:100%;justify-content:space-between}.dashboard-reports .month-picker-inline{max-width:70%}.dashboard-reports .month-display.report{max-width:100%;white-space:nowrap}}
+
+
+/* Mobile navigation consistency: keep Dashboard, Bills, and Bank & Cash aligned */
+@media (max-width: 700px) {
+  .app-shell { width:100%; max-width:100%; padding:12px; box-sizing:border-box; }
+  main, .section, #dashboard, #bills, #cash {
+    width:100%;
+    max-width:100%;
+    min-width:0;
+    box-sizing:border-box;
+  }
+  .section { margin:0; }
+  .section > *, #dashboard > *, #bills > *, #cash > * {
+    min-width:0;
+    max-width:100%;
+    box-sizing:border-box;
+  }
+  .section-heading { width:100%; box-sizing:border-box; }
+  .card, .table-card, .dashboard-reports, .dashboard-reports .card,
+  .stat-grid, .dashboard-grid, .bank-grid, .toolbar, .form-grid {
+    width:100%;
+    min-width:0;
+    max-width:100%;
+    box-sizing:border-box;
+  }
+  .tabs {
+    width:100%;
+    max-width:100%;
+    box-sizing:border-box;
+    display:flex;
+    gap:4px;
+  }
+  .tab {
+    flex:1 1 0;
+    min-width:0;
+    white-space:normal;
+    overflow-wrap:anywhere;
+    text-align:center;
+    line-height:1.2;
+    padding:9px 5px;
+  }
+  .dashboard-reports .stat-grid,
+  .dashboard-reports .dashboard-grid {
+    grid-template-columns:minmax(0,1fr);
+  }
+  .dashboard-reports .section-heading { align-items:flex-start; }
+  .table-card { overflow:hidden; }
+  .table-wrap { width:100%; min-width:0; }
+}
+@media (max-width: 380px) {
+  .app-shell { padding:9px; }
+  .tabs { padding:3px; }
+  .tab { font-size:10px; padding:8px 3px; }
+}
