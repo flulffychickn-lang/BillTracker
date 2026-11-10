@@ -13,7 +13,16 @@
   const esc = v => String(v ?? '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','\'':'&#039;','"':'&quot;'}[c]));
   const fmtDate = d => d ? new Date(`${d}T00:00:00`).toLocaleDateString('en-PH', {month:'short', day:'numeric', year:'numeric'}) : '—';
   const fmtDateLong = d => d ? new Date(`${d}T00:00:00`).toLocaleDateString('en-GB', {day:'2-digit', month:'short', year:'numeric'}) : '';
-  const isCashSource = value => /cash/i.test(String(value || ''));
+  const isCashSource = value => String(value || '').toLowerCase() === 'cash';
+  const bankSourceValue = bankId => `bank:${bankId}`;
+  const bankSourceId = value => String(value || '').startsWith('bank:') ? String(value).slice(5) : '';
+  const paymentSourceLabel = value => {
+    if (!value) return '—';
+    if (value === 'Cash') return 'Cash in Hand';
+    const id = bankSourceId(value);
+    if (id) return state.banks.find(bank => bank.id === id)?.name || 'Bank account (deleted)';
+    return value; // Keep historical payment labels readable.
+  };
 
   const defaultState = () => ({
     version: 4,
@@ -104,6 +113,9 @@
       }
     });
     state.withdrawals.filter(w => w.bankId === bankId).forEach(w => bal -= Number(w.amount)||0);
+    // Paid bills assigned to this bank account reduce its available balance.
+    state.bills.filter(b => b.status === 'Paid' && bankSourceId(b.paymentSource) === bankId)
+      .forEach(b => bal -= Number(b.amount) || 0);
     return bal;
   }
 
@@ -182,8 +194,39 @@
     applyTheme(saved || (prefersDark ? 'dark' : 'light'));
   }
 
+  function refreshAutomaticMonth(shouldRender = true) {
+    const currentMonth = monthKey(localToday());
+    const lastAutoMonth = state.settings.lastAutoMonth;
+    let changed = false;
+
+    // First launch after this update: move any stale saved default to the current month.
+    if (!lastAutoMonth) {
+      state.settings.defaultMonth = currentMonth;
+      state.settings.lastAutoMonth = currentMonth;
+      changed = true;
+    } else if (lastAutoMonth !== currentMonth) {
+      // Only roll forward automatically if the user was still viewing the previously-current month.
+      if (!state.settings.defaultMonth || state.settings.defaultMonth === lastAutoMonth) {
+        state.settings.defaultMonth = currentMonth;
+      }
+      state.settings.lastAutoMonth = currentMonth;
+      changed = true;
+    }
+
+    if (changed) {
+      persistOnly();
+      const dashboardMonth = document.getElementById('dashboardMonth');
+      const reportMonth = document.getElementById('reportMonth');
+      if (dashboardMonth) dashboardMonth.value = state.settings.defaultMonth || currentMonth;
+      if (reportMonth) reportMonth.value = state.settings.defaultMonth || currentMonth;
+      if (shouldRender) renderAll();
+    }
+    return changed;
+  }
+
   function init() {
     initTheme();
+    refreshAutomaticMonth(false);
     const baseMonth = state.settings.defaultMonth || monthKey(localToday());
     ['dashboardMonth','reportMonth'].forEach(id => document.getElementById(id).value = baseMonth);
     document.querySelectorAll('.tab').forEach(btn => btn.addEventListener('click', () => switchSection(btn.dataset.section)));
@@ -339,6 +382,11 @@
     state.settings.defaultMonth = value;
     persistOnly();
     renderAll();
+    // If the app remains open across a month boundary, refresh when the user returns.
+    window.addEventListener('focus', () => refreshAutomaticMonth(true));
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) refreshAutomaticMonth(true);
+    });
   }
 
   function switchSection(id) {
@@ -475,7 +523,7 @@
     const cats = categoryTotals(m), max = Math.max(...Object.values(cats), 1);
     document.getElementById('categoryBreakdown').innerHTML = Object.entries(cats).filter(([,v]) => v > 0).sort((a,b) => b[1]-a[1]).map(([c,v]) => `<div class="category-row"><div class="category-meta"><strong>${esc(c)}</strong><div class="category-bar"><div class="category-fill" style="width:${(v/max)*100}%"></div></div></div><div class="category-right"><strong>${money(v)}</strong></div></div>`).join('') || '<div class="empty-state">No paid spending recorded for this month.</div>';
     const recent = [...state.bills].sort((a,b) => String(b.paidDate || b.dueDate).localeCompare(String(a.paidDate || a.dueDate))).slice(0,6);
-    document.getElementById('recentTransactions').innerHTML = recent.length ? recent.map(b => `<div class="list-row"><div><strong>${esc(b.name)}</strong><span class="sub">${fmtDate(b.paidDate || b.dueDate)} • ${esc(b.category)} • ${esc(b.paymentSource || '—')}</span></div><div><div class="amount">${money(b.amount)}</div><span class="badge ${b.status==='Paid'?'paid':'unpaid'}">${esc(b.status)}</span></div></div>`).join('') : '<div class="empty-state">No bills or expenses yet.</div>';
+    document.getElementById('recentTransactions').innerHTML = recent.length ? recent.map(b => `<div class="list-row"><div><strong>${esc(b.name)}</strong><span class="sub">${fmtDate(b.paidDate || b.dueDate)} • ${esc(b.category)} • ${esc(paymentSourceLabel(b.paymentSource))}</span></div><div><div class="amount">${money(b.amount)}</div><span class="badge ${b.status==='Paid'?'paid':'unpaid'}">${esc(b.status)}</span></div></div>`).join('') : '<div class="empty-state">No bills or expenses yet.</div>';
   }
 
   function renderBills() {
@@ -493,7 +541,7 @@
       <td>${fmtDate(b.dueDate)}</td>
       <td><strong>${money(b.amount)}</strong></td>
       <td><span class="badge ${b.status==='Paid'?'paid':'unpaid'}">${esc(b.status)}</span>${b.status==='Paid'&&b.paidDate ? `<span class="table-sub">Paid ${fmtDate(b.paidDate)}</span>` : ''}</td>
-      <td>${esc(b.paymentSource || '—')}</td>
+      <td>${esc(paymentSourceLabel(b.paymentSource))}</td>
       <td class="action-cell">${b.status!=='Paid' ? `<button class="mini-btn success-action" type="button" data-action="paid" data-id="${esc(b.id)}">✓ Mark Paid</button>` : ''}<button class="mini-btn" type="button" data-action="editBill" data-id="${esc(b.id)}">Edit</button><button class="mini-btn danger" type="button" data-action="deleteBill" data-id="${esc(b.id)}">Delete</button></td>
     </tr>`).join('');
     document.getElementById('billsEmpty').classList.toggle('hidden', rows.length > 0);
@@ -580,7 +628,7 @@
       ${field('mBillAmount','Amount',`<input id="mBillAmount" type="number" min="0.01" step="0.01" required placeholder="0.00" value="${b?.amount ?? ''}">`)}
       ${field('mBillDue','Due / Transaction Date',`<input id="mBillDue" type="date" required value="${esc(b?.dueDate || localToday())}">`)}
       ${field('mBillStatus','Status',`<select id="mBillStatus"><option value="Unpaid" ${(b?.status || 'Unpaid') === 'Unpaid' ? 'selected' : ''}>Unpaid</option><option value="Paid" ${(b?.status || 'Unpaid') === 'Paid' ? 'selected' : ''}>Paid</option></select>`)}
-      ${field('mBillSource','Payment Source (optional)',`<select id="mBillSource"><option value="" ${(b?.paymentSource || '') === '' ? 'selected' : ''}>Select source</option><option value="Cash" ${b?.paymentSource === 'Cash' ? 'selected' : ''}>Cash</option><option value="GCash" ${b?.paymentSource === 'GCash' ? 'selected' : ''}>GCash</option></select>`,true,'Choose Cash when the payment came from your physical cash balance. Choose GCash for GCash payments.')}
+      ${field('mBillSource','Payment Source (optional)',`<select id="mBillSource"><option value="" ${(b?.paymentSource || '') === '' ? 'selected' : ''}>Select source</option><option value="Cash" ${b?.paymentSource === 'Cash' ? 'selected' : ''}>Cash in Hand</option>${state.banks.map(bank => `<option value="${esc(bankSourceValue(bank.id))}" ${b?.paymentSource === bankSourceValue(bank.id) ? 'selected' : ''}>${esc(bank.name)}</option>`).join('')}${b?.paymentSource === 'GCash' ? '<option value="GCash" selected>GCash (previous record)</option>' : ''}</select>`,true,'Choose Cash in Hand for physical cash, or select a bank account. Paid bills assigned to a bank account are deducted from that bank’s available balance.')}
       ${field('mBillNotes','Notes (Optional)',`<textarea id="mBillNotes" rows="3" placeholder="Add a short note if useful">${esc(b?.notes || '')}</textarea>`,true)}
     </div>`, () => {
       const data = {id:b?.id || uid('bill'), name:document.getElementById('mBillName').value.trim(), category:document.getElementById('mBillCategory').value,
@@ -859,7 +907,7 @@
       ['IMPORTANT TERMS'],
       ['Paid', 'The bill or expense has been marked Paid.'],
       ['Unpaid', 'The bill or expense has not been marked Paid yet.'],
-      ['Payment Source', 'Cash or GCash.'],
+      ['Payment Source', 'Cash in Hand or a selected bank account. Paid bills assigned to a bank account reduce that bank’s available balance.'],
       ['Fast Transfer', 'Money moved from one bank to another. It changes bank balances but is not a spending expense.'],
       ['Cash Withdrawal', 'Physical cash taken from a bank. Bank balance goes down and Cash in Hand goes up.'],
       ['Cash Used', 'Paid bills or expenses whose Payment Source is Cash.'],
@@ -909,7 +957,7 @@
       Number(b.amount)||0,
       b.status,
       b.paidDate ? fmtDateLong(b.paidDate) : '',
-      b.paymentSource || '',
+      paymentSourceLabel(b.paymentSource),
       b.notes || ''
     ]));
 

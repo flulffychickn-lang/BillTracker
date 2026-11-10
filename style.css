@@ -993,3 +993,26 @@ body.dark-theme .toast {
   .tabs { padding:3px; }
   .tab { font-size:10px; padding:8px 3px; }
 }
+
+
+/* Payment source account picker: keep long bank lists scrollable on mobile and desktop. */
+.custom-select-menu{max-height:220px;overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable;}
+@media(max-width:700px){.custom-select-menu{max-height:190px;overflow-y:auto;-webkit-overflow-scrolling:touch;}}
+
+/* Bank account list: keep the Bank & Cash page compact when many accounts exist. */
+#bankCards.bank-grid{
+  max-height: 430px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  align-content: start;
+  padding: 2px 8px 2px 2px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--accent) var(--surface, #edf3f0);
+  overscroll-behavior: contain;
+}
+#bankCards.bank-grid::-webkit-scrollbar{width:8px}
+#bankCards.bank-grid::-webkit-scrollbar-track{background:var(--surface, #edf3f0);border-radius:999px}
+#bankCards.bank-grid::-webkit-scrollbar-thumb{background:var(--accent);border-radius:999px}
+@media(max-width:700px){
+  #bankCards.bank-grid{max-height:360px;padding-right:7px}
+}
