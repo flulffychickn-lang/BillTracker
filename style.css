@@ -1016,3 +1016,34 @@ body.dark-theme .toast {
 @media(max-width:700px){
   #bankCards.bank-grid{max-height:360px;padding-right:7px}
 }
+
+/* Combined bank account and payment-source scrolling fixes. */
+#bankCards.bank-grid{
+  display:grid;
+  max-height:430px;
+  overflow-y:auto;
+  overflow-x:hidden;
+  align-content:start;
+  scrollbar-width:thin;
+  scrollbar-color:var(--accent) var(--surface, #edf3f0);
+  overscroll-behavior:contain;
+}
+#bankCards.bank-grid::-webkit-scrollbar,
+.custom-select-menu::-webkit-scrollbar{width:9px}
+#bankCards.bank-grid::-webkit-scrollbar-track,
+.custom-select-menu::-webkit-scrollbar-track{background:var(--surface, #edf3f0);border-radius:999px}
+#bankCards.bank-grid::-webkit-scrollbar-thumb,
+.custom-select-menu::-webkit-scrollbar-thumb{background:var(--accent);border-radius:999px}
+.custom-select-menu{
+  max-height:220px;
+  overflow-y:auto;
+  overflow-x:hidden;
+  scrollbar-width:thin;
+  scrollbar-color:var(--accent) var(--surface, #edf3f0);
+  overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch;
+}
+@media(max-width:700px){
+  #bankCards.bank-grid{max-height:360px}
+  .custom-select-menu{max-height:190px}
+}
