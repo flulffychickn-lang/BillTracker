@@ -16,7 +16,7 @@
       <div class="brand-block">
         <div class="eyebrow">PERSONAL FINANCE</div>
         <div class="title-row"><h1>BILL TRACKER</h1><button class="theme-icon" id="themeToggle" type="button" aria-label="Switch to dark theme" aria-pressed="false" title="Switch theme">☾</button></div>
-        <p class="subtitle">Bills, spending, banks, withdrawals and cash — kept simple.</p>
+        <p class="subtitle">Bills, spending, banks, time deposits and cash — kept simple.</p>
       </div>
       <div class="top-actions">
         <button class="btn secondary" id="exportBtn" type="button">↥ Backup</button>
@@ -31,6 +31,7 @@
       <button class="tab active" type="button" data-section="dashboard">🏠 Dashboard</button>
       <button class="tab" type="button" data-section="bills">🧾 Bills</button>
       <button class="tab" type="button" data-section="cash">🏦 Bank & Cash</button>
+      <button class="tab" type="button" data-section="time-deposits">🔒 Time Deposit</button>
     </nav>
 
     <main>
@@ -177,6 +178,24 @@
             </table>
           </div>
           <div id="bankTransactionsEmpty" class="empty-state hidden">No bank transactions yet.</div>
+        </div>
+      </section>
+
+      <section class="section" id="time-deposits">
+        <div class="section-heading">
+          <div><span class="eyebrow">SAVINGS</span><h2>Time Deposits</h2></div>
+          <button class="btn primary prominent" id="addTimeDepositBtn" type="button">＋ New Time Deposit</button>
+        </div>
+        <div class="tip-banner"><strong>Set aside money from one of your bank accounts.</strong> Enter the interest rate and term in months. Active deposits are deducted from the source bank's available balance. When ready, transfer the deposit back to that bank.</div>
+        <div class="stat-grid three">
+          <article class="stat-card accent"><span>Active Deposits</span><strong id="tdActiveTotal">₱0.00</strong><small id="tdActiveCount">0 active</small></article>
+          <article class="stat-card"><span>Expected Interest</span><strong id="tdInterestTotal">₱0.00</strong><small>For active deposits at maturity</small></article>
+          <article class="stat-card"><span>Total at Maturity</span><strong id="tdMaturityTotal">₱0.00</strong><small>Principal + estimated interest</small></article>
+        </div>
+        <div class="card table-card">
+          <div class="card-title-row"><div><span class="eyebrow">DEPOSIT RECORDS</span><h3>Your Time Deposits</h3></div></div>
+          <div class="table-wrap records-scroll"><table><thead><tr><th>Bank</th><th>Principal</th><th>Rate (p.a.)</th><th>Term</th><th>Start</th><th>Maturity</th><th>Est. Interest</th><th>Status</th><th>Action</th></tr></thead><tbody id="timeDepositsTableBody"></tbody></table></div>
+          <div id="timeDepositsEmpty" class="empty-state">No time deposits yet.</div>
         </div>
       </section>
 

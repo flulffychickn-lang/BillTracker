@@ -31,7 +31,8 @@
     bills: [],
     bankTransactions: [],
     withdrawals: [],
-    cashAdjustments: []
+    cashAdjustments: [],
+    timeDeposits: []
   });
 
   let state = loadState();
@@ -93,7 +94,8 @@
         toBankId:String(t.toBankId || '')
       })) : [],
       withdrawals:Array.isArray(s.withdrawals) ? s.withdrawals.map(w => ({...w, amount:Number(w.amount)||0})) : [],
-      cashAdjustments:Array.isArray(s.cashAdjustments) ? s.cashAdjustments.map(a => ({...a, amount:Number(a.amount)||0})) : []
+      cashAdjustments:Array.isArray(s.cashAdjustments) ? s.cashAdjustments.map(a => ({...a, amount:Number(a.amount)||0})) : [],
+      timeDeposits:Array.isArray(s.timeDeposits) ? s.timeDeposits.map(d => ({...d, amount:Number(d.amount)||0, rate:Number(d.rate)||0, months:Number(d.months)||0, bankId:String(d.bankId||''), status:d.status==='returned'?'returned':'active'})) : []
     };
   }
 
@@ -113,6 +115,8 @@
       }
     });
     state.withdrawals.filter(w => w.bankId === bankId).forEach(w => bal -= Number(w.amount)||0);
+    // Active time deposits are reserved from the source bank's available balance.
+    state.timeDeposits.filter(d => d.status === 'active' && d.bankId === bankId).forEach(d => bal -= Number(d.amount)||0);
     // Paid bills assigned to this bank account reduce its available balance.
     state.bills.filter(b => b.status === 'Paid' && bankSourceId(b.paymentSource) === bankId)
       .forEach(b => bal -= Number(b.amount) || 0);
@@ -242,6 +246,7 @@
     document.getElementById('addTransactionBtn').addEventListener('click', () => openBankTransactionModal());
     document.getElementById('addTransferBtn').addEventListener('click', () => openTransferModal());
     document.getElementById('addWithdrawalBtn').addEventListener('click', () => openWithdrawalModal());
+    document.getElementById('addTimeDepositBtn').addEventListener('click', () => openTimeDepositModal());
     document.getElementById('billSearch').addEventListener('input', renderBills);
     document.getElementById('billStatusFilter').addEventListener('change', renderBills);
     document.getElementById('billCategoryFilter').addEventListener('change', renderBills);
@@ -402,7 +407,7 @@
     renderAll();
   }
 
-  function renderAll() { populateFilters(); renderDashboard(); renderBills(); renderCash(); renderReports(); enhanceSelects(); }
+  function renderAll() { populateFilters(); renderDashboard(); renderBills(); renderCash(); renderReports(); renderTimeDeposits(); enhanceSelects(); }
 
   // Replace native dropdowns with compact in-app dropdowns so option menus
   // stay inside the available width on narrow/mobile screens. The hidden
@@ -591,6 +596,86 @@
     document.querySelectorAll('[data-tx-delete]').forEach(btn => btn.addEventListener('click', () => confirmDeleteTransaction(btn.dataset.txDelete)));
   }
 
+  function addMonthsToDate(dateString, months) {
+    const [y,m,d] = dateString.split('-').map(Number);
+    const target = new Date(y, m - 1 + months, 1);
+    const lastDay = new Date(target.getFullYear(), target.getMonth()+1, 0).getDate();
+    target.setDate(Math.min(d, lastDay));
+    return `${target.getFullYear()}-${pad(target.getMonth()+1)}-${pad(target.getDate())}`;
+  }
+  function timeDepositInterest(deposit) {
+    return (Number(deposit.amount)||0) * (Number(deposit.rate)||0) / 100 * (Number(deposit.months)||0) / 12;
+  }
+  function renderTimeDeposits() {
+    const active = state.timeDeposits.filter(d => d.status === 'active');
+    const principal = active.reduce((sum,d)=>sum+d.amount,0);
+    const interest = active.reduce((sum,d)=>sum+timeDepositInterest(d),0);
+    document.getElementById('tdActiveTotal').textContent = money(principal);
+    document.getElementById('tdActiveCount').textContent = `${active.length} active`;
+    document.getElementById('tdInterestTotal').textContent = money(interest);
+    document.getElementById('tdMaturityTotal').textContent = money(principal+interest);
+    const rows = [...state.timeDeposits].sort((a,b)=>String(b.startDate).localeCompare(String(a.startDate)));
+    document.getElementById('timeDepositsTableBody').innerHTML = rows.map(d => {
+      const bank = state.banks.find(b=>b.id===d.bankId)?.name || 'Bank unavailable';
+      const matured = d.maturityDate <= localToday();
+      const status = d.status==='returned' ? 'Transferred back' : (matured ? 'Matured • Active' : 'Active');
+      const interestValue = d.status==='returned' ? Number(d.returnedInterest||0) : timeDepositInterest(d);
+      return `<tr><td>${esc(bank)}</td><td><strong>${money(d.amount)}</strong></td><td>${Number(d.rate).toFixed(2)}%</td><td>${d.months} months</td><td>${fmtDate(d.startDate)}</td><td>${fmtDate(d.maturityDate)}</td><td>${money(interestValue)}</td><td><span class="badge ${d.status==='returned'?'paid':'unpaid'}">${status}</span></td><td>${d.status==='active'?`<button class="mini-btn success-action" type="button" data-td-return="${esc(d.id)}">Transfer back</button>`:'—'}</td></tr>`;
+    }).join('');
+    document.getElementById('timeDepositsEmpty').classList.toggle('hidden', rows.length>0);
+    document.querySelectorAll('[data-td-return]').forEach(btn=>btn.addEventListener('click',()=>returnTimeDeposit(btn.dataset.tdReturn)));
+  }
+  function openTimeDepositModal() {
+    if (!state.banks.length) { alert('Add a bank account in Bank & Cash first.'); switchSection('cash'); return; }
+    const bankOptions = state.banks.map(b=>`<option value="${esc(b.id)}">${esc(b.name)} • ${money(bankBalance(b.id))} available</option>`).join('');
+    openModal('New Time Deposit','SAVINGS',`<div class="form-grid">${field('mTdBank','Source Bank',`<select id="mTdBank">${bankOptions}</select>`)}${field('mTdAmount','Amount to Deposit',`<input id="mTdAmount" type="number" min="0.01" step="0.01" required placeholder="0.00">`)}${field('mTdRate','Annual Interest Rate (%)',`<input id="mTdRate" type="number" min="0" max="100" step="0.01" required placeholder="e.g. 4.5">`)}${field('mTdMonths','Term (months)',`<input id="mTdMonths" type="number" min="1" max="120" step="1" required value="6">`)}${field('mTdStart','Start Date',`<input id="mTdStart" type="date" required value="${localToday()}">`)}<div class="field full"><div class="field-help">Interest is estimated using a simple annual rate, prorated by the number of months. Actual bank interest, taxes, and fees may differ.</div></div></div>`,()=>{
+      const bankId=document.getElementById('mTdBank').value, amount=Number(document.getElementById('mTdAmount').value), rate=Number(document.getElementById('mTdRate').value), months=Number(document.getElementById('mTdMonths').value), startDate=document.getElementById('mTdStart').value;
+      if(!Number.isFinite(amount)||amount<=0||!Number.isFinite(rate)||rate<0||rate>100||!Number.isInteger(months)||months<1||months>120||!startDate){showFormError('Enter a valid amount, annual rate, term, and start date.');return false;}
+      const available=bankBalance(bankId); if(amount>available){showFormError(`Insufficient available bank balance. Available: ${money(available)}`);return false;}
+      state.timeDeposits.push({id:uid('td'),bankId,amount,rate,months,startDate,maturityDate:addMonthsToDate(startDate,months),status:'active'}); save(); toast('Time deposit created and amount transferred from your bank.');
+    });
+  }
+  function returnTimeDeposit(id) {
+    const d=state.timeDeposits.find(x=>x.id===id && x.status==='active'); if(!d)return;
+    if(!state.banks.length){alert('Add a bank account in Bank & Cash before returning this deposit.');switchSection('cash');return;}
+    const matured=d.maturityDate<=localToday();
+    const interest=matured?timeDepositInterest(d):0;
+    const total=d.amount+interest;
+    const originalBank=state.banks.find(b=>b.id===d.bankId);
+    const defaultBankId=originalBank ? originalBank.id : state.banks[0].id;
+    const options=state.banks.map(b=>`<option value="${esc(b.id)}" ${b.id===defaultBankId?'selected':''}>${esc(b.name)} • ${money(bankBalance(b.id))} available</option>`).join('');
+    const message=matured
+      ? `Choose the bank account to receive ${money(total)}. This includes estimated interest of ${money(interest)}.`
+      : `This deposit has not reached maturity. Choose the bank account to receive the principal only (${money(d.amount)}); no estimated interest will be added.`;
+    openModal('Transfer Time Deposit Back','SELECT DESTINATION ACCOUNT',`<div class="form-grid"><div class="field full"><div class="field-help">${esc(message)}</div></div>${field('mTdReturnBank','Transfer To Bank Account',`<select id="mTdReturnBank" required>${options}</select>`)}<div class="field full"><div class="field-help">Amount to transfer: <strong>${money(total)}</strong></div></div></div>`,()=>{
+      const destinationBankId=document.getElementById('mTdReturnBank').value;
+      const destination=state.banks.find(b=>b.id===destinationBankId);
+      if(!destination){showFormError('Please select a valid destination bank account.');return false;}
+      if(!confirm(`Transfer ${money(total)} to ${destination.name}?`))return false;
+      d.status='returned'; d.returnedDate=localToday(); d.returnedInterest=interest; d.returnedToBankId=destinationBankId;
+      // The active deposit already reduces the source bank's available balance in bankBalance().
+      // On return, changing status releases that reserved principal. Do not deposit the principal
+      // again when returning to the same bank, or it will be double-counted.
+      if (originalBank && destinationBankId !== d.bankId) {
+        // Move the released principal from its original bank to the selected destination.
+        state.bankTransactions.push({
+          id:uid('tx'), type:'transfer', fromBankId:d.bankId, toBankId:destinationBankId,
+          amount:Number(d.amount)||0, date:localToday(),
+          notes:`Time deposit principal transferred to ${destination.name}`
+        });
+      }
+      // Interest is new money, so credit only the interest as a deposit.
+      if (interest > 0) {
+        state.bankTransactions.push({
+          id:uid('tx'), bankId:destinationBankId, type:'deposit',
+          amount:interest, date:localToday(),
+          notes:`Estimated time deposit interest from ${originalBank?.name||'original bank'}`
+        });
+      }
+      save(); toast(`Time deposit transferred to ${destination.name}.`);
+    });
+  }
+
   function renderReports() {
     const m = document.getElementById('reportMonth').value || monthKey(localToday());
     document.getElementById('reportMonthDisplay').textContent = monthLabel(m);
@@ -696,7 +781,7 @@
 
   function showFormError(msg){ toast(msg); const form=document.getElementById('modalForm'); form.animate([{transform:'translateX(0)'},{transform:'translateX(-5px)'},{transform:'translateX(5px)'},{transform:'translateX(0)'}],{duration:180}); }
   function confirmDeleteBill(id){ if(!confirm('Delete this bill / expense?')) return; state.bills=state.bills.filter(x=>x.id!==id); save(); toast('Deleted.'); }
-  function confirmDeleteBank(id){ const hasTx=state.withdrawals.some(x=>x.bankId===id)||state.bankTransactions.some(x=>x.bankId===id); if(hasTx){alert('This bank has transactions or cash withdrawals. Delete those first.');return;} if(!confirm('Delete this bank account?'))return; state.banks=state.banks.filter(x=>x.id!==id); save(); toast('Bank deleted.'); }
+  function confirmDeleteBank(id){ const hasTx=state.withdrawals.some(x=>x.bankId===id)||state.bankTransactions.some(x=>x.bankId===id)||state.timeDeposits.some(x=>x.bankId===id&&x.status==='active'); if(hasTx){alert('This bank has transactions, cash withdrawals, or an active time deposit. Resolve those records first.');return;} if(!confirm('Delete this bank account?'))return; state.banks=state.banks.filter(x=>x.id!==id); save(); toast('Bank deleted.'); }
   function confirmDeleteWithdrawal(id){ if(!confirm('Delete this cash withdrawal? Its cash amount will also be removed from Cash in Hand.'))return; state.withdrawals=state.withdrawals.filter(x=>x.id!==id); save(); toast('Cash withdrawal deleted.'); }
   function confirmDeleteTransaction(id){ if(!confirm('Delete this bank transaction?'))return; state.bankTransactions=state.bankTransactions.filter(x=>x.id!==id); save(); toast('Bank transaction deleted.'); }
 
